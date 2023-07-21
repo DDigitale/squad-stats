@@ -1,7 +1,8 @@
 body {
-  height: 100vh;
   background-image: linear-gradient(to top, rgba(43, 43, 44, 0.95), rgba(60, 63, 65, 0.9)), url("../../public/images/bg.jpg");
   background-size: cover;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
   font-family: "JetBrainsMonoNL NF", sans-serif;
 }
 
