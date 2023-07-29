@@ -4,6 +4,19 @@
   grid-template-columns: 1fr 1fr 1fr 1fr;
   grid-template-rows: 1fr 1fr;
 }
+.container .blockItem {
+  display: none;
+}
+.container .blockItem:first-child {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.container:hover .blockItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
 
 .block-wrapper {
   width: 100%;
@@ -24,7 +37,7 @@
   flex-direction: column;
   align-items: center;
   padding: 0.5rem;
-  gap: 0.5rem;
+  gap: 1rem;
   border-bottom: 1px solid var(--color-gray2);
   border-right: 1px solid var(--color-gray2);
 }
@@ -32,11 +45,22 @@
 .nickname {
   font-size: 1.3rem;
   color: var(--color-main);
+  transition: 0.3s;
+}
+.nickname:hover {
+  color: var(--color-orange);
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .count {
   font-size: 1rem;
+  margin-top: 0.5rem;
   color: var(--color-main2);
+}
+
+.link {
+  all: unset;
+  cursor: pointer;
 }
 
 /*# sourceMappingURL=TopStatBlock.module.css.map */

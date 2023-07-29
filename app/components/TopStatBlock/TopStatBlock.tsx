@@ -1,79 +1,86 @@
 'use client'
 import styles from './TopStatBlock.module.scss';
 import {useQuery} from "@tanstack/react-query";
-import {fetchPlayersListData} from "@/utils/api";
+import React from "react";
+import Link from "next/link";
+import {fetchTopPlayersData} from "@/app/lib/api";
 
 interface Props {
     name: string
-    nickname: string
-    steamid: string
-    count: string
+    player: any
 }
 
 interface PlayersListProps {
-    players: any[]
+    // players: any[]
 }
 
-const Block = ({name, nickname, steamid, count}: Props) => {
+const Block = ({name, player}: Props) => {
+
     return (
         <div className={styles.blockWrapper}>
             <div className={styles.title}>{name}</div>
             <div className={styles.block}>
-                <span className={styles.nickname}>{nickname}</span>
-                <span className={styles.count}>{count}</span>
+                <div className={styles.blockItem} key={player.steamID}>
+                    <Link href={`/user/${player.steamID}`} className={styles.link}>
+                        <span className={styles.nickname}>{player.lastname}</span>
+                    </Link>
+                    <span className={styles.count}>{player.count}</span>
+                </div>
             </div>
         </div>
     )
 }
 
+const NullBlock = ({name}: any) => {
+
+    return (
+        <div className={styles.blockWrapper}>
+            <div className={styles.title}>{name}</div>
+            <div className={styles.block}>
+                <div className={styles.blockItem}>
+                    <span className={styles.nickname}>{`{nickname: null}`}</span>
+                    <span className={styles.count}>{`{counter: null}`}</span>
+                </div>
+            </div>
+        </div>
+    )
+}
+
+
 export const TopStatBlock = (props: PlayersListProps) => {
-    const {players} = props;
+    // const {players} = props;
 
     const {data} = useQuery({
-        queryKey: ['players-top'],
-        queryFn: fetchPlayersListData,
-        initialData: players
+        queryKey: ['top-players'],
+        queryFn: fetchTopPlayersData,
+        // initialData: players
     })
-
-    console.log(data.topPlayers)
 
     return (
         <div className={styles.container}>
-            <Block name={"ТОП УБИЙСТВ"}
-                   nickname={data.topPlayers.topKills[0].lastname}
-                   steamid={data.topPlayers.topKills[0].steamid}
-                   count={data.topPlayers.topKills[0].kills}
-            />
-            <Block name={"ТОП СМЕРТЕЙ"}
-                   nickname={data.topPlayers.topDeaths[0].lastname}
-                   steamid={data.topPlayers.topDeaths[0].steamid}
-                   count={data.topPlayers.topDeaths[0].deaths}
-            />
-            <Block name={"ТОП РАНЕНИЙ"}
-                   nickname={data.topPlayers.topWounds[0].lastname}
-                   steamid={data.topPlayers.topWounds[0].steamid}
-                   count={data.topPlayers.topWounds[0].wounds}
-            />
-            <Block name={"ТОП КД"}
-                   nickname={data.topPlayers.topKd[0].lastname}
-                   steamid={data.topPlayers.topKd[0].steamid}
-                   count={data.topPlayers.topKd[0].kd.toFixed(2)}/>
-            <Block name={"ТОП ПОДНЯТИЙ"}
-                   nickname={data.topPlayers.topRevives[0].lastname}
-                   steamid={data.topPlayers.topRevives[0].steamid}
-                   count={data.topPlayers.topRevives[0].revives}/>
-            <Block name={"ТОП ТИМКИЛЛОВ"}
-                   nickname={data.topPlayers.topTeamkills[0].lastname}
-                   steamid={data.topPlayers.topTeamkills[0].steamid}
-                   count={data.topPlayers.topTeamkills[0].teamkills}/>
-            <Block name={"ТОП МАТЧЕЙ"}
-                   nickname={data.topPlayers.topMatches[0].lastname}
-                   steamid={data.topPlayers.topMatches[0].steamid}
-                   count={data.topPlayers.topMatches[0].matches}/>
-            <Block name={"АНТИ-ТОП КД"}
-                   nickname={data.topPlayers.antiTopKd[0].lastname}
-                   steamid={data.topPlayers.antiTopKd[0].steamid}
-                   count={data.topPlayers.antiTopKd[0].kd.toFixed(2)}/>
+            {data ?
+                <>
+                    <Block name={"ТОП УБИЙСТВ"} player={data.topKills}/>
+                    <Block name={"ТОП СМЕРТЕЙ"} player={data.topDeaths}/>
+                    <Block name={"ТОП РАНЕНИЙ"} player={data.topWounds}/>
+                    <Block name={"ТОП КД"} player={data.topKd}/>
+                    <Block name={"ТОП ПОДНЯТИЙ"} player={data.topRevives}/>
+                    <Block name={"ТОП ТИМКИЛЛОВ"} player={data.topTeamkills}/>
+                    <Block name={"ТОП МАТЧЕЙ"} player={data.topMatches}/>
+                    <Block name={"АНТИ-ТОП КД"} player={data.antiTopKd}/>
+                </>
+                :
+                <>
+                    <NullBlock name={"ТОП УБИЙСТВ"}/>
+                    <NullBlock name={"ТОП СМЕРТЕЙ"}/>
+                    <NullBlock name={"ТОП РАНЕНИЙ"}/>
+                    <NullBlock name={"ТОП КД"}/>
+                    <NullBlock name={"ТОП ПОДНЯТИЙ"}/>
+                    <NullBlock name={"ТОП ТИМКИЛЛОВ"}/>
+                    <NullBlock name={"ТОП МАТЧЕЙ"}/>
+                    <NullBlock name={"АНТИ-ТОП КД"}/>
+                </>
+            }
         </div>
     )
 }

@@ -1,28 +1,14 @@
-'use client'
-import {useEffect, useState} from "react";
 import {UserProfile} from "@/app/components/UserProfile/UserProfile";
+import {InfoBlock} from "@/app/components/InfoBlock/InfoBlock";
+import {fetchPlayerDetailsData} from "@/app/lib/api";
 
-export default function UserDetailsPage({params}: { params: { id: string } }) {
-    const [data, setData] = useState<any>(null);
+export default async function UserDetailsPage({params}: { params: { id: string } }) {
 
     const steamid = params.id;
 
-    useEffect(() => {
-        const fetchData = async () => {
-            const response = await fetch(`/api/user/${steamid}`);
-            const json = await response.json();
-            setData(json);
-        };
-
-        fetchData();
-    }, [steamid]);
+    // const playerDetailsData = await fetchPlayerDetailsData(steamid.toString());
 
     return (
-        <div>
-            {data?.info ?
-                <UserProfile player={data}/>
-                : <h1>Loading...</h1>
-            }
-        </div>
+        <UserProfile steamid={steamid}/>
     )
 }

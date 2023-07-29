@@ -1,87 +1,121 @@
 // Скрипт для сбора общих показателей
+CREATE TABLE IF NOT EXISTS temp_stat (
+                                         kills INT,
+                                         deaths INT,
+                                         wounds INT,
+                                         reviwes INT,
+                                         matches INT,
+                                         teamkills INT
+);
+
+TRUNCATE squadjs.temp_stat;
+
+INSERT INTO squadjs.temp_stat (kills, deaths, wounds, reviwes, matches, teamkills)
+SELECT
+    (SELECT COUNT(*) AS count
+     FROM squadjs.DBLog_SteamUsers
+              JOIN squadjs.DBLog_Deaths ON squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
+     WHERE teamkill = 0) AS kills,
+    (SELECT COUNT(*)
+     FROM squadjs.DBLog_SteamUsers
+              JOIN squadjs.DBLog_Deaths ON squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.attacker
+     WHERE teamkill = 0) AS deaths,
+    (SELECT COUNT(*)
+     FROM squadjs.DBLog_Wounds
+     WHERE teamkill = 0) AS wounds,
+    (SELECT COUNT(*)
+     FROM squadjs.DBLog_Revives) AS reviwes,
+    (SELECT COUNT(*)
+     FROM squadjs.DBLog_Matches
+     WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%') AS matches,
+    (SELECT COUNT(*) AS count
+     FROM squadjs.DBLog_SteamUsers
+              JOIN squadjs.DBLog_Deaths ON squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
+     WHERE teamkill = 1) AS teamkills;
+
 TRUNCATE TABLE squadjs.DBLog_ServerStat;
-INSERT INTO squadjs.DBLog_ServerStat (deaths, kills, wounds, teamkills, reviwes, matches)
-SELECT (SELECT COUNT(*) AS count
-        FROM squadjs.DBLog_SteamUsers
-                 JOIN squadjs.DBLog_Deaths
-                      ON squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
-        WHERE (teamkill = 0))                                         AS kills,
-       (SELECT COUNT(*)
-        FROM squadjs.DBLog_SteamUsers
-                 JOIN squadjs.DBLog_Deaths
-                      on squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.attacker
-        WHERE (teamkill = 0))                                         AS deaths,
-       (SELECT COUNT(*)
-        FROM squadjs.DBLog_Wounds
-        WHERE (teamkill = 0))                                         AS wounds,
-       (SELECT COUNT(*) FROM squadjs.DBLog_Revives)                   AS reviwes,
-       (SELECT COUNT(*)
-        FROM squadjs.DBLog_Matches
-        WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%') AS matches,
-       (SELECT COUNT(*) AS count
-        FROM squadjs.DBLog_SteamUsers
-                 JOIN squadjs.DBLog_Deaths
-                      ON squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
-        WHERE (teamkill = 1))                                         AS teamkills
+
+INSERT INTO squadjs.DBLog_ServerStat (kills, deaths, wounds, reviwes, matches, teamkills)
+SELECT kills, deaths, wounds, reviwes, matches, teamkills
+FROM squadjs.temp_stat;
 
 // Для записи в calculated
-TRUNCATE TABLE squadjs.DBLog_Calculated;
-INSERT INTO squadjs.DBLog_Calculated (steamID, lastName, deaths, kills, wounds, teamkills, revives, matches, kd)
+CREATE TABLE IF NOT EXISTS squadjs.temp_calc (
+                                                 steamID VARCHAR(255),
+                                                 lastName VARCHAR(255),
+                                                 deaths INT,
+                                                 kills INT,
+                                                 wounds INT,
+                                                 teamkills INT,
+                                                 revives INT,
+                                                 matches INT,
+                                                 kd DOUBLE
+);
+
+TRUNCATE TABLE squadjs.temp_calc;
+
+INSERT INTO squadjs.temp_calc (steamID, lastName, deaths, kills, wounds, teamkills, revives, matches, kd)
 SELECT squadjs.DBLog_SteamUsers.steamID,
-    squadjs.DBLog_SteamUsers.lastName,
-    (SELECT COUNT(*) AS kills
-FROM squadjs.DBLog_Deaths
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
-AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
-AND (squadjs.DBLog_Deaths.teamkill = 0  )) AS deaths,
-    (SELECT COUNT(*) AS deaths
-FROM squadjs.DBLog_Deaths
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
-AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.attacker
-AND (squadjs.DBLog_Deaths.teamkill = 0  )) AS kills,
-    (SELECT COUNT(*) AS wounds
-FROM squadjs.DBLog_Wounds
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Wounds.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
-AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Wounds.attacker
-AND (squadjs.DBLog_Wounds.teamkill = 0)) AS wounds,
-    (SELECT COUNT(*) AS wounds
-FROM squadjs.DBLog_Wounds
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Wounds.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
-AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Wounds.attacker
-AND (squadjs.DBLog_Wounds.teamkill = 1))                                          AS teamkills,
-    (SELECT COUNT(*) AS revives
-FROM squadjs.DBLog_Revives
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Revives.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
-AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Revives.reviver)             AS reviwes,
-    (SELECT COUNT(DISTINCT squadjs.DBLog_Wounds.match) AS matches
-FROM squadjs.DBLog_Wounds
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Wounds.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Wounds.attacker = squadjs.DBLog_SteamUsers.steamID
-AND squadjs.DBLog_Wounds.match IS NOT NULL
-AND squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%')                       AS matches,
-    (SELECT COUNT(*) AS kills
-FROM squadjs.DBLog_Deaths
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
-AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.attacker
-AND (squadjs.DBLog_Deaths.teamkill = 0  )) /
-(SELECT COUNT(*) AS deaths
-FROM squadjs.DBLog_Deaths
-JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
-WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
-AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
-AND (squadjs.DBLog_Deaths.teamkill = 0  )) AS kd
+       squadjs.DBLog_SteamUsers.lastName,
+       (SELECT COUNT(*) AS kills
+        FROM squadjs.DBLog_Deaths
+                 JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
+        WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
+          AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
+          AND (squadjs.DBLog_Deaths.teamkill = 0  )) AS deaths,
+       (SELECT COUNT(*) AS deaths
+        FROM squadjs.DBLog_Deaths
+                 JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
+        WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
+          AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.attacker
+          AND (squadjs.DBLog_Deaths.teamkill = 0  )) AS kills,
+       (SELECT COUNT(*) AS wounds
+        FROM squadjs.DBLog_Wounds
+                 JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Wounds.match = squadjs.DBLog_Matches.id
+        WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
+          AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Wounds.attacker
+          AND (squadjs.DBLog_Wounds.teamkill = 0)) AS wounds,
+       (SELECT COUNT(*) AS wounds
+        FROM squadjs.DBLog_Wounds
+                 JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Wounds.match = squadjs.DBLog_Matches.id
+        WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
+          AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Wounds.attacker
+          AND (squadjs.DBLog_Wounds.teamkill = 1))                                          AS teamkills,
+       (SELECT COUNT(*) AS revives
+        FROM squadjs.DBLog_Revives
+                 JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Revives.match = squadjs.DBLog_Matches.id
+        WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
+          AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Revives.reviver)             AS reviwes,
+       (SELECT COUNT(DISTINCT squadjs.DBLog_Wounds.match) AS matches
+        FROM squadjs.DBLog_Wounds
+                 JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Wounds.match = squadjs.DBLog_Matches.id
+        WHERE squadjs.DBLog_Wounds.attacker = squadjs.DBLog_SteamUsers.steamID
+          AND squadjs.DBLog_Wounds.match IS NOT NULL
+          AND squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%')                       AS matches,
+       ROUND((SELECT COUNT(*) AS kills
+              FROM squadjs.DBLog_Deaths
+                       JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
+              WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
+                AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.attacker
+                AND (squadjs.DBLog_Deaths.teamkill = 0  )) /
+             (SELECT COUNT(*) AS deaths
+              FROM squadjs.DBLog_Deaths
+                       JOIN squadjs.DBLog_Matches ON squadjs.DBLog_Deaths.match = squadjs.DBLog_Matches.id
+              WHERE squadjs.DBLog_Matches.layerClassname NOT LIKE '%seed%'
+                AND squadjs.DBLog_SteamUsers.steamID = squadjs.DBLog_Deaths.victim
+                AND (squadjs.DBLog_Deaths.teamkill = 0  )), 2) AS kd
 FROM squadjs.DBLog_SteamUsers
 WHERE EXISTS (SELECT *
-    FROM squadjs.DBLog_Wounds
-WHERE squadjs.DBLog_Wounds.victim = squadjs.DBLog_SteamUsers.steamID
-AND squadjs.DBLog_Wounds.time >= (current_date - interval 2 WEEK))
+              FROM squadjs.DBLog_Wounds
+              WHERE squadjs.DBLog_Wounds.victim = squadjs.DBLog_SteamUsers.steamID
+                AND squadjs.DBLog_Wounds.time >= (current_date - interval 2 WEEK))
 HAVING deaths >= 2
-AND kills >= 10
-AND wounds >= 10
-AND matches >= 20
+   AND kills >= 10
+   AND wounds >= 10
+   AND matches >= 20;
+
+TRUNCATE TABLE squadjs.DBLog_Calculated;
+
+INSERT INTO squadjs.DBLog_Calculated (steamID, lastName, deaths, kills, wounds, teamkills, revives, matches, kd)
+SELECT steamID, lastName, deaths, kills, wounds, teamkills, revives, matches, kd
+FROM squadjs.temp_calc;

@@ -1,9 +1,7 @@
 .UserProfile {
-  margin: 1rem;
 }
 
 .top {
-  width: 100%;
   background-color: rgba(124, 116, 116, 0.2);
   display: flex;
   gap: 1rem;
@@ -47,13 +45,12 @@
 }
 
 .columns {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr auto auto auto;
   margin-top: 1rem;
 }
 
-//
-.block-wrapper {
+.blockWrapper {
   width: 100%;
 }
 
@@ -68,11 +65,13 @@
 }
 
 .block {
+  height: 100%;
   background-color: rgba(124, 116, 116, 0.2);
   display: flex;
   flex-direction: column;
   align-items: center;
   padding: 0.5rem;
+  gap: 0.5rem;
   border-bottom: 1px solid var(--color-gray2);
   border-right: 1px solid var(--color-gray2);
 }
@@ -82,10 +81,25 @@
   display: flex;
   width: 100%;
   justify-content: space-between;
-  font-size: 0.85rem;
+  gap: 0.5rem;
+  font-size: 1rem;
 }
 
-//
+.tempStyleLastData {
+  color: var(--color-main2);
+  display: grid;
+  grid-template-columns: auto auto 1fr;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  font-size: 1rem;
+}
+
+.server {
+  //margin-right: auto;
+}
+
 .smnickname {
   &:hover {
     color: var(--color-orange);
@@ -96,7 +110,7 @@
 }
 
 .smnicknamered {
-  color: red;
+  color: #ff0000;
 
   &:hover {
     color: var(--color-orange);
@@ -106,7 +120,35 @@
   transition: color 0.2s;
 }
 
+.smNullnickname {
+}
+
+.smNullnicknamered {
+  color: #ff0000;
+}
+
 .link {
   all: unset;
   cursor: pointer;
+}
+
+.icon {
+  cursor: pointer;
+  margin-right: 1rem;
+  font-size: 3rem;
+  color: var(--color-gray3);
+  transition: 0.3s;
+
+  &:hover {
+    color: var(--color-orange);
+    scale: 1.1;
+  }
+}
+
+.time {
+  font-size: 0.85rem;
+}
+
+.topBtns {
+  margin-left: auto;
 }

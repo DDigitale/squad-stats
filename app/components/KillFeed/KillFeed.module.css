@@ -1,76 +1,55 @@
-.wrapper {
+.KillFeed {
   width: 50%;
   display: flex;
   flex-direction: column;
   gap: 1rem;
 }
 
-.playerItem {
-  display: flex;
-  color: var(--color-main2);
-  background-color: rgba(124, 116, 116, 0.2);
-  padding: 0.5rem;
-}
-
-.info {
-  width: 100%;
+.rows {
   display: flex;
   flex-direction: column;
-  justify-content: start;
+  gap: 0.5rem;
 }
 
-.position {
-  width: 5rem;
-  display: flex;
-  font-size: 2rem;
-  align-items: center;
-  justify-content: center;
-}
-
-.top {
-  display: flex;
-  width: 100%;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.kd {
-  font-size: 1.3rem;
+.row {
+  background-color: rgba(124, 116, 116, 0.2);
+  gap: 0.5rem;
   color: var(--color-main2);
-  font-weight: 700;
+  display: grid;
+  grid-template-columns: auto 1fr auto 1fr auto;
+  align-items: center;
+  padding: 0.5rem;
+  justify-content: space-between;
 }
 
-.nickname {
-  color: var(--color-main);
-  font-size: 1.5rem;
-  font-weight: 500;
-  transition: color 0.2s;
+.date {
+  font-size: 0.85rem;
 }
-.nickname:hover {
+
+.attacker {
+  transition: 0.3s;
+}
+.attacker:hover {
   color: var(--color-orange);
   text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
-.bottom {
-  display: flex;
-  gap: 0.4rem;
+.nullPlayer {
+  cursor: default;
 }
 
-.mtext {
-  display: flex;
-  align-items: center;
-  gap: 0.3rem;
+.rightNullPlayer {
+  cursor: default;
+  margin-left: auto;
 }
 
-.smtext {
-  font-size: 0.75rem;
+.victim {
+  margin-left: auto;
+  transition: 0.3s;
 }
-
-.link {
-  all: unset;
-  cursor: pointer;
+.victim:hover {
+  color: var(--color-orange);
+  text-shadow: 0px 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .searchSort {
@@ -110,8 +89,19 @@
   color: var(--color-dark1);
 }
 
-.listTitle {
-  background-color: #343434;
+.link {
+  all: unset;
+  cursor: pointer;
 }
 
-/*# sourceMappingURL=PlayersList.module.css.map */
+.rightLink {
+  all: unset;
+  cursor: pointer;
+  margin-left: auto;
+}
+
+.weapon {
+  font-size: 0.8rem;
+}
+
+/*# sourceMappingURL=KillFeed.module.css.map */

@@ -5,7 +5,7 @@ const nextConfig = {
       {
         protocol: 'https',
         port: '',
-        pathname: '',
+        pathname: '/ISteamUser/GetPlayerSummaries/',
         hostname: 'avatars.steamstatic.com'
       }
     ]

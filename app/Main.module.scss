@@ -1,0 +1,27 @@
+.columns {
+  display: flex;
+  margin: 1rem;
+  gap: 1rem;
+}
+
+.loadingWrapper {
+  display: flex;
+  width: 100%;
+  height: 50vh;
+  align-items: center;
+  justify-content: center;
+}
+
+.loading {
+  font-size: 3rem;
+  font-weight: 700;
+  color: var(--color-main2);
+}
+
+.errorText {
+  display: flex;
+  font-size: 3rem;
+  color: var(--color-red);
+  margin-top: 3rem;
+  justify-content: center;
+}
